@@ -80,21 +80,26 @@ theorem isTriangleTransversal_iff_spec (g : FGraph) (X : List Edge) :
     g.isTriangleTransversal X = true ↔
       X.Nodup ∧ (∀ e, e ∈ X → e ∈ g.edges) ∧
       TriangleCoverSpec Tri.edgeList (fun t => g.isTriangle t = true) X := by
-  have hcheck : g.isTriangleTransversal X = true ↔
-      X.Nodup ∧ (∀ e, e ∈ X → e ∈ g.edges) ∧
-      (∀ t, t ∈ g.allTriangles → Hits Tri.edgeList X t) := by
-    simp [isTriangleTransversal, List.all_eq_true, List.contains_iff_mem,
-      triangleHit_iff, and_assoc]
-  rw [hcheck]
   constructor
-  · rintro ⟨hn, he, hc⟩
-    refine ⟨hn, he, ?_⟩
+  · intro h
+    have hh : X.Nodup ∧
+        (∀ e, e ∈ X → e ∈ g.edges) ∧
+        (∀ t, t ∈ g.allTriangles →
+          t.edgeList.any (fun e => X.contains e) = true) := by
+      simpa [isTriangleTransversal, List.all_eq_true] using h
+    refine ⟨hh.1, hh.2.1, ?_⟩
     intro t ht
-    exact hc t ((mem_allTriangles_iff g t).mpr ht)
+    exact (triangleHit_iff t X).mp
+      (hh.2.2 t ((mem_allTriangles_iff g t).mpr ht))
   · rintro ⟨hn, he, hc⟩
-    refine ⟨hn, he, ?_⟩
-    intro t ht
-    exact hc t ((mem_allTriangles_iff g t).mp ht)
+    have hh :
+        (∀ t, t ∈ g.allTriangles →
+          t.edgeList.any (fun e => X.contains e) = true) := by
+      intro t ht
+      exact (triangleHit_iff t X).mpr
+        (hc t ((mem_allTriangles_iff g t).mp ht))
+    simp [isTriangleTransversal, List.all_eq_true, hn, he, hh]
+
 
 end FGraph
 end TuzaDelta8
