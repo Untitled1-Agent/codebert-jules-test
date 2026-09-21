@@ -1,2 +1,3 @@
 import TuzaDelta8.AbstractReduction
 import TuzaDelta8.KernelScratch
+import TuzaDelta8.GraphSemantics
